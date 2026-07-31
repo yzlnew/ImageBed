@@ -1,0 +1,118 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="980" viewBox="0 0 1600 980" role="img" aria-labelledby="title desc">
+  <title id="title">电子墨水屏 Dashboard 系统架构</title>
+  <desc id="desc">渲染 VM 从 Home Assistant 读取状态，生成两种面板 PNG，上传回 Home Assistant，再由黑白与六色电子墨水屏拉取。</desc>
+  <defs>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="8" stdDeviation="10" flood-color="#1c1c1c" flood-opacity=".08"/>
+    </filter>
+    <pattern id="dots" width="14" height="14" patternUnits="userSpaceOnUse">
+      <circle cx="3" cy="3" r="1.4" fill="#1c1c1c" opacity=".18"/>
+    </pattern>
+    <pattern id="diag" width="12" height="12" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
+      <line x1="0" y1="0" x2="0" y2="12" stroke="#1c1c1c" stroke-width="2" opacity=".12"/>
+    </pattern>
+    <marker id="arrow" markerWidth="12" markerHeight="12" refX="10" refY="6" orient="auto">
+      <path d="M0,0 L12,6 L0,12 z" fill="#1c1c1c"/>
+    </marker>
+    <marker id="arrow-blue" markerWidth="12" markerHeight="12" refX="10" refY="6" orient="auto">
+      <path d="M0,0 L12,6 L0,12 z" fill="#2e4296"/>
+    </marker>
+    <style>
+      .sans{font-family:"Noto Sans SC","PingFang SC","Microsoft YaHei",sans-serif}
+      .mono{font-family:"Space Mono","JetBrains Mono",monospace}
+      .title{font-size:46px;font-weight:800;fill:#1c1c1c}
+      .subtitle{font-size:20px;font-weight:600;fill:#58564f}
+      .zone{font-size:15px;font-weight:800;letter-spacing:2px;fill:#58564f}
+      .h2{font-size:26px;font-weight:800;fill:#1c1c1c}
+      .h3{font-size:18px;font-weight:800;fill:#1c1c1c}
+      .body{font-size:16px;font-weight:600;fill:#45433e}
+      .small{font-size:14px;font-weight:700;fill:#58564f}
+      .flow{fill:none;stroke:#1c1c1c;stroke-width:3;marker-end:url(#arrow)}
+      .flow-blue{fill:none;stroke:#2e4296;stroke-width:4;marker-end:url(#arrow-blue)}
+      .light{fill:#f4f2ec}
+    </style>
+  </defs>
+
+  <rect width="1600" height="980" fill="#f4f2ec"/>
+  <rect x="24" y="24" width="1552" height="932" rx="26" fill="none" stroke="#1c1c1c" stroke-width="2"/>
+  <text x="72" y="88" class="sans title">把屏幕当成一张会自己换的纸</text>
+  <text x="74" y="124" class="sans subtitle">服务端完成排版与量化，ESP32 只负责拉取 PNG 和整屏刷新</text>
+
+  <text x="72" y="188" class="mono zone">01 · RENDER VM</text>
+  <rect x="64" y="208" width="646" height="646" rx="24" fill="#fbfaf6" stroke="#1c1c1c" stroke-width="3" filter="url(#shadow)"/>
+  <rect x="64" y="208" width="646" height="82" rx="24" fill="#1c1c1c"/>
+  <rect x="64" y="266" width="646" height="24" fill="#1c1c1c"/>
+  <text x="98" y="258" class="sans h2 light">Proxmox 中的常开 Linux VM</text>
+
+  <rect x="98" y="324" width="578" height="112" rx="16" fill="#e6de3c" stroke="#1c1c1c" stroke-width="2"/>
+  <text x="124" y="362" class="mono zone" fill="#1c1c1c">DATA ADAPTERS</text>
+  <text x="124" y="397" class="sans h3">HA states · 新闻 · 天气 · 照片 · AI 文本</text>
+  <text x="124" y="420" class="sans small">缺失或网络失败时，统一退回可渲染的数据</text>
+
+  <path d="M387 436 V466" class="flow"/>
+  <rect x="98" y="468" width="578" height="124" rx="16" fill="#f4f2ec" stroke="#1c1c1c" stroke-width="2"/>
+  <rect x="98" y="468" width="20" height="124" fill="#3a7a4a"/>
+  <text x="140" y="508" class="mono zone">HTML / CSS / JINJA + PLAYWRIGHT</text>
+  <text x="140" y="545" class="sans h3">固定 800×480 · deviceScaleFactor=1</text>
+  <text x="140" y="571" class="sans small">字体加载、Canvas 绘制、像素几何全部先校验</text>
+
+  <path d="M387 592 V622" class="flow"/>
+  <rect x="98" y="624" width="578" height="164" rx="16" fill="#f4f2ec" stroke="#1c1c1c" stroke-width="2"/>
+  <rect x="98" y="624" width="20" height="164" fill="#2e4296"/>
+  <text x="140" y="664" class="mono zone">PANEL PIPELINE</text>
+  <text x="140" y="701" class="sans h3">同一语义色 → 两套物理输出</text>
+  <rect x="140" y="724" width="230" height="42" rx="9" fill="#1c1c1c"/>
+  <text x="158" y="751" class="mono small light">BW · 1-BIT THRESHOLD</text>
+  <rect x="388" y="724" width="254" height="42" rx="9" fill="#b02a28"/>
+  <text x="406" y="751" class="mono small light">E6 · SIX-INK QUANTIZE</text>
+
+  <text x="780" y="188" class="mono zone">02 · HOME ASSISTANT</text>
+  <rect x="770" y="208" width="374" height="646" rx="24" fill="#fbfaf6" stroke="#1c1c1c" stroke-width="3" filter="url(#shadow)"/>
+  <rect x="770" y="208" width="374" height="82" rx="24" fill="#2e4296"/>
+  <rect x="770" y="266" width="374" height="24" fill="#2e4296"/>
+  <text x="804" y="258" class="sans h2 light">Home Assistant</text>
+
+  <rect x="804" y="324" width="306" height="120" rx="16" fill="url(#dots)" stroke="#1c1c1c" stroke-width="2"/>
+  <text x="830" y="362" class="mono zone">STATE API</text>
+  <text x="830" y="397" class="sans h3">温湿度 · 设备 · 天气</text>
+  <text x="830" y="422" class="sans small">渲染 VM 只读实体状态</text>
+
+  <rect x="804" y="478" width="306" height="128" rx="16" fill="#f4f2ec" stroke="#1c1c1c" stroke-width="2"/>
+  <text x="830" y="516" class="mono zone">CONTROL</text>
+  <text x="830" y="551" class="sans h3">Dashboard selector</text>
+  <text x="830" y="578" class="sans small">轮播选择 · 手动刷新按钮</text>
+
+  <rect x="804" y="640" width="306" height="148" rx="16" fill="#3a7a4a" stroke="#1c1c1c" stroke-width="2"/>
+  <text x="830" y="678" class="mono zone light">STATIC FILES</text>
+  <text x="830" y="715" class="sans h3 light">/config/www/eink/</text>
+  <text x="830" y="743" class="mono small light">dashboard.png</text>
+  <text x="830" y="766" class="mono small light">dashboard_e6.png</text>
+
+  <text x="1220" y="188" class="mono zone">03 · E-PAPER</text>
+  <rect x="1208" y="208" width="328" height="646" rx="24" fill="#fbfaf6" stroke="#1c1c1c" stroke-width="3" filter="url(#shadow)"/>
+  <rect x="1242" y="252" width="260" height="230" rx="14" fill="#f4f2ec" stroke="#1c1c1c" stroke-width="3"/>
+  <rect x="1260" y="270" width="224" height="134" fill="url(#diag)" stroke="#1c1c1c" stroke-width="2"/>
+  <path d="M1280 376 L1320 326 L1355 356 L1398 302 L1464 384" fill="none" stroke="#1c1c1c" stroke-width="8"/>
+  <rect x="1290" y="424" width="164" height="34" rx="7" fill="#1c1c1c"/>
+  <text x="1312" y="447" class="mono small light">BW · 7.5"</text>
+
+  <rect x="1242" y="532" width="260" height="230" rx="14" fill="#f4f2ec" stroke="#1c1c1c" stroke-width="3"/>
+  <rect x="1260" y="550" width="224" height="134" fill="#ded03c" stroke="#1c1c1c" stroke-width="2"/>
+  <circle cx="1310" cy="604" r="30" fill="#b02a28"/>
+  <rect x="1350" y="572" width="108" height="64" fill="#2e4296"/>
+  <path d="M1260 656 H1484" stroke="#3a7a4a" stroke-width="18"/>
+  <rect x="1278" y="704" width="188" height="34" rx="7" fill="#b02a28"/>
+  <text x="1297" y="727" class="mono small light">E6 · SPECTRA 6</text>
+
+  <path d="M770 382 H712" class="flow"/>
+  <text x="716" y="361" class="mono small" text-anchor="middle">REST</text>
+  <path d="M770 548 H712" class="flow"/>
+  <text x="718" y="528" class="mono small" text-anchor="middle">POLL</text>
+  <path d="M710 706 H770" class="flow-blue"/>
+  <text x="740" y="686" class="mono small" text-anchor="middle">SSH DEPLOY</text>
+  <path d="M1144 704 H1208" class="flow-blue"/>
+  <text x="1176" y="682" class="mono small" text-anchor="middle">HTTP GET</text>
+
+  <rect x="64" y="886" width="1472" height="42" rx="10" fill="#1c1c1c"/>
+  <text x="800" y="913" class="mono small light" text-anchor="middle">RENDER → VALIDATE → QUANTIZE → DEPLOY → PULL → FULL REFRESH</text>
+</svg>
